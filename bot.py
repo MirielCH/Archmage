@@ -52,10 +52,10 @@ async def get_prefix_all(bot, ctx):
         record = cur.fetchone()
         
         if record:
-            prefixes = (record[1],'rpg ',)
+            prefixes = (record[1],'rpg ','Rpg ','rPg ','rpG ','RPg ','rPG ','RpG ','RPG ')
         else:
             cur.execute('INSERT INTO settings_guild VALUES (?, ?)', (ctx.guild.id, global_data.default_prefix,))
-            prefixes = (global_data.default_prefix,'rpg ')
+            prefixes = (global_data.default_prefix,'rpg ','Rpg ','rPg ','rpG ','RPg ','rPG ','RpG ','RPG ')
     except sqlite3.Error as error:
         await log_error(ctx, error)
         
@@ -164,8 +164,8 @@ async def log_error(ctx, error, guild_join=False):
         try:
             settings = ''
             try:
-                user_settings = await get_settings(bot, ctx)
-                settings = f'TT{user_settings[0]}, {user_settings[1]}'
+                user_settings = await get_settings(ctx)
+                settings = f'Enchant {user_settings[0]}'
             except:
                 settings = 'N/A'
             cur=erg_db.cursor()
@@ -186,12 +186,11 @@ async def log_error(ctx, error, guild_join=False):
 async def first_time_user(bot, ctx):
     
     try:
-        current_settings = await get_settings(bot, ctx)
         
         prefix = ctx.prefix
         
         await ctx.send(
-            f'So, **{ctx.author.name}**. You want to do some enchanting, huh? Well, you have to tell me what you want to go for first, then.\n'
+            f'Hey, **{ctx.author.name}**, you haven\'t set an enchant yet.\n'
             f'Use `{ctx.prefix}set [enchant]` to set the enchant you\'re going for and I will mute you once you reach the set enchant (or a higher one, of course).'
         )
     except:
@@ -279,22 +278,25 @@ async def on_command_error(ctx, error):
 @commands.bot_has_permissions(send_messages=True)
 async def setprefix(ctx, *new_prefix):
     
-    if new_prefix:
-        if len(new_prefix)>1:
-            await ctx.send(f'The command syntax is `{ctx.prefix}setprefix [prefix]`')
+    prefix = ctx.prefix
+    if not prefix.lower() == 'rpg ':
+        if new_prefix:
+            if len(new_prefix)>1:
+                await ctx.send(f'The command syntax is `{ctx.prefix}setprefix [prefix]`.')
+            else:
+                await set_prefix(bot, ctx, new_prefix[0])
+                await ctx.send(f'Prefix changed to `{await get_prefix(bot, ctx)}`.')
         else:
-            await set_prefix(bot, ctx, new_prefix[0])
-            await ctx.send(f'Prefix changed to `{await get_prefix(bot, ctx)}`')
-    else:
-        await ctx.send(f'The command syntax is `{ctx.prefix}setprefix [prefix]`')
+            await ctx.send(f'The command syntax is `{ctx.prefix}setprefix [prefix]`.')
 
 # Command "prefix" - Returns current prefix
 @bot.command()
 @commands.bot_has_permissions(send_messages=True)
 async def prefix(ctx):
     
-    current_prefix = await get_prefix(bot, ctx)
-    await ctx.send(f'The prefix for this server is `{current_prefix}`\nTo change the prefix use `{current_prefix}setprefix [prefix]`')
+    if not ctx.prefix == 'rpg ':
+        current_prefix = await get_prefix(bot, ctx)
+        await ctx.send(f'The prefix for this server is `{current_prefix}`\nTo change the prefix use `{current_prefix}setprefix [prefix]`.')
 
 
 # --- User Settings ---
@@ -304,22 +306,24 @@ async def prefix(ctx):
 @commands.bot_has_permissions(send_messages=True, manage_roles=True)
 async def settings(ctx):
     
-    current_settings = await get_settings(ctx)
-    
-    if current_settings:
-        enchants = global_data.enchants_list
-        enchant_setting = current_settings[0]
-        enchant_setting = int(enchant_setting)
-        enchant_name = enchants[enchant_setting]
-        if enchant_setting > 7:
-            enchant_name = enchant_name.upper()
-        else:
-            enchant_name = enchant_name.title()
+    prefix = ctx.prefix
+    if not prefix.lower() == 'rpg ':
+        current_settings = await get_settings(ctx)
         
-        await ctx.send(
-            f'**{ctx.author.name}**, your target enchant is set to **{enchant_name}**\n'
-            f'Use `{ctx.prefix}set [enchant]` to change it.'
-        )
+        if current_settings:
+            enchants = global_data.enchants_list
+            enchant_setting = current_settings[0]
+            enchant_setting = int(enchant_setting)
+            enchant_name = enchants[enchant_setting]
+            if enchant_setting > 7:
+                enchant_name = enchant_name.upper()
+            else:
+                enchant_name = enchant_name.title()
+            
+            await ctx.send(
+                f'**{ctx.author.name}**, your target enchant is set to **{enchant_name}**.\n'
+                f'Use `{ctx.prefix}set [enchant]` to change it.'
+            )
     
 # Command "setenchant" - Sets your target enchant
 @bot.command(aliases=('se','set',))
@@ -329,39 +333,41 @@ async def setenchant(ctx, *args):
     def check(m):
         return m.author == ctx.author and m.channel == ctx.channel
     
-    enchants = global_data.enchants_list
-    aliases = global_data.enchants_aliases
-    
-    if args:
-        target_enchant = ''
-        original_args = ''
-        for arg in args:
-            target_enchant = f'{target_enchant}{arg}'
-            if original_args == '':
-                original_args = arg
-            else:
-                original_args = f'{original_args} {arg}'
+    prefix = ctx.prefix
+    if not prefix.lower() == 'rpg ':
+        enchants = global_data.enchants_list
+        aliases = global_data.enchants_aliases
         
-        target_enchant = target_enchant.lower()
-        
-        if target_enchant in aliases:
-            target_enchant = aliases[target_enchant]   
-        
-        if target_enchant in enchants:
-            enchant_index = enchants.index(target_enchant)
-            if enchant_index > 7:
-                target_enchant = target_enchant.upper()
-            else:
-                target_enchant = target_enchant.title()
-
-            await set_enchant(ctx, enchant_index)
-            await ctx.send(f'Alright **{ctx.author.name}**, I\'ll mute you when you enchant your gear to **{target_enchant}** or higher.')
+        if args:
+            target_enchant = ''
+            original_args = ''
+            for arg in args:
+                target_enchant = f'{target_enchant}{arg}'
+                if original_args == '':
+                    original_args = arg
+                else:
+                    original_args = f'{original_args} {arg}'
             
+            target_enchant = target_enchant.lower()
+            
+            if target_enchant in aliases:
+                target_enchant = aliases[target_enchant]   
+            
+            if target_enchant in enchants:
+                enchant_index = enchants.index(target_enchant)
+                if enchant_index > 7:
+                    target_enchant = target_enchant.upper()
+                else:
+                    target_enchant = target_enchant.title()
+
+                await set_enchant(ctx, enchant_index)
+                await ctx.send(f'Alright **{ctx.author.name}**, I\'ll mute you when you enchant your gear to **{target_enchant}** or higher.')
+                
+            else:
+                await ctx.send(f'I don\'t know any enchant called `{original_args}`.')
+                return
         else:
-            await ctx.send(f'I don\'t know any enchant called `{original_args}`')
-            return
-    else:
-        await ctx.send(f'The command syntax is `{ctx.prefix}set [enchant]`')
+            await ctx.send(f'The command syntax is `{ctx.prefix}set [enchant]`.')
 
 
 
@@ -440,28 +446,30 @@ async def enchant(ctx, *args):
 @commands.bot_has_permissions(send_messages=True, embed_links=True)
 async def help(ctx):
     
-    prefix = await get_prefix(bot, ctx)
-                 
-    user_settings = (
-        f'{emojis.bp} `{prefix}settings` / `{prefix}me` : Check your target enchant\n'
-        f'{emojis.bp} `{prefix}set` : Set your target enchant'
-    )  
-    
-    server_settings = (
-        f'{emojis.bp} `{prefix}prefix` : Check the bot prefix\n'
-        f'{emojis.bp} `{prefix}setprefix` / `{prefix}sp` : Set the bot prefix'
-    )  
-    
-    embed = discord.Embed(
-        color = global_data.color,
-        title = 'ARCHMAGE',
-        description =   f'Well **{ctx.author.name}**, need to do some enchanting?'
-    )    
-    embed.set_footer(text=await global_data.default_footer(prefix))
-    embed.add_field(name='USER SETTINGS', value=user_settings, inline=False)
-    embed.add_field(name='SERVER SETTINGS', value=server_settings, inline=False)
-    
-    await ctx.send(embed=embed)
+    prefix = ctx.prefix
+    if not prefix.lower() == 'rpg ':
+        prefix = await get_prefix(bot, ctx)
+                    
+        user_settings = (
+            f'{emojis.bp} `{prefix}settings` / `{prefix}me` : Check your target enchant\n'
+            f'{emojis.bp} `{prefix}set` : Set your target enchant'
+        )  
+        
+        server_settings = (
+            f'{emojis.bp} `{prefix}prefix` : Check the bot prefix\n'
+            f'{emojis.bp} `{prefix}setprefix` / `{prefix}sp` : Set the bot prefix'
+        )  
+        
+        embed = discord.Embed(
+            color = global_data.color,
+            title = 'ARCHMAGE',
+            description =   f'Well **{ctx.author.name}**, need to do some enchanting?'
+        )    
+        embed.set_footer(text=await global_data.default_footer(prefix))
+        embed.add_field(name='USER SETTINGS', value=user_settings, inline=False)
+        embed.add_field(name='SERVER SETTINGS', value=server_settings, inline=False)
+        
+        await ctx.send(embed=embed)
 
 
 
@@ -472,19 +480,21 @@ async def help(ctx):
 @commands.bot_has_permissions(send_messages=True, embed_links=True)
 async def devstats(ctx):
 
-    guilds = len(list(bot.guilds))
-    user_number = await get_user_number(ctx)
-    latency = bot.latency
-    
-    embed = discord.Embed(
-        color = global_data.color,
-        title = f'BOT STATISTICS',
-        description =   f'{emojis.bp} {guilds:,} servers\n'\
-                        f'{emojis.bp} {user_number[0]:,} users\n'\
-                        f'{emojis.bp} {round(latency*1000):,} ms latency'
-    )
-    
-    await ctx.send(embed=embed)
+    prefix = ctx.prefix
+    if not prefix.lower() == 'rpg ':
+        guilds = len(list(bot.guilds))
+        user_number = await get_user_number(ctx)
+        latency = bot.latency
+        
+        embed = discord.Embed(
+            color = global_data.color,
+            title = f'BOT STATISTICS',
+            description =   f'{emojis.bp} {guilds:,} servers\n'\
+                            f'{emojis.bp} {user_number[0]:,} users\n'\
+                            f'{emojis.bp} {round(latency*1000):,} ms latency'
+        )
+        
+        await ctx.send(embed=embed)
   
 
 
@@ -498,13 +508,15 @@ async def shutdown(ctx):
 
     def check(m):
         return m.author == ctx.author and m.channel == ctx.channel
-    
-    await ctx.send(f'**{ctx.author.name}**, are you **SURE**? `[yes/no]`')
-    answer = await bot.wait_for('message', check=check, timeout=30)
-    if answer.content.lower() in ['yes','y']:
-        await ctx.send(f'Shutting down.')
-        await ctx.bot.logout()
-    else:
-        await ctx.send(f'Phew, was afraid there for a second.')
+
+    prefix = ctx.prefix
+    if not prefix.lower() == 'rpg ':    
+        await ctx.send(f'**{ctx.author.name}**, are you **SURE**? `[yes/no]`')
+        answer = await bot.wait_for('message', check=check, timeout=30)
+        if answer.content.lower() in ['yes','y']:
+            await ctx.send(f'Shutting down.')
+            await ctx.bot.logout()
+        else:
+            await ctx.send(f'Phew, was afraid there for a second.')
 
 bot.run(TOKEN)

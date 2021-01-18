@@ -6,8 +6,7 @@ import os
 bot_dir = os.path.dirname(__file__)
 
 # Databases
-dbfile = os.path.join(bot_dir, 'database/erg_db.db')
-default_dbfile = os.path.join(bot_dir, 'database/erg_db_default.db')
+dbfile = os.path.join(bot_dir, 'database/archmage_db.db')
 
 # Prefix
 default_prefix = '-'
