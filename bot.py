@@ -390,8 +390,8 @@ async def enchant(ctx, *args):
         
         return m.author.id == 555955826880413696 and m.channel == ctx.channel and correct_embed
 
-    
-    if ctx.prefix == 'rpg 'and len(args) == 1:
+    prefix = ctx.prefix
+    if prefix.lower() == 'rpg 'and len(args) == 1:
         arg = args[0]
         arg = arg.lower()
         if (arg == 'armor') or (arg == 'sword') or (arg == 'test'):
@@ -430,7 +430,7 @@ async def enchant(ctx, *args):
                     overwrite.send_messages = False
                     
                     await channel.set_permissions(user, overwrite=overwrite)
-                    await ctx.send(f"Nice, **{user.name}**, looks like you enchanted **{current_enchant_name}**. Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.")
+                    await ctx.send(f"{user.mention} Nice! Looks like you enchanted **{current_enchant_name}**. Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.")
                     await asyncio.sleep(5)
                     await channel.set_permissions(user, overwrite=None)
                     await ctx.send(f"Carry on.")
