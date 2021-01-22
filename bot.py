@@ -35,7 +35,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 dbfile = global_data.dbfile
 
 # Open connection to the local database    
-erg_db = sqlite3.connect(dbfile, isolation_level=None)
+archmage_db = sqlite3.connect(dbfile, isolation_level=None)
 
          
 # --- Database: Get Data ---
@@ -44,7 +44,7 @@ erg_db = sqlite3.connect(dbfile, isolation_level=None)
 async def get_prefix_all(bot, ctx):
     
     try:
-        cur=erg_db.cursor()
+        cur=archmage_db.cursor()
         cur.execute('SELECT * FROM settings_guild where guild_id=?', (ctx.guild.id,))
         record = cur.fetchone()
         
@@ -67,7 +67,7 @@ async def get_prefix(bot, ctx, guild_join=False):
         guild = ctx
     
     try:
-        cur=erg_db.cursor()
+        cur=archmage_db.cursor()
         cur.execute('SELECT * FROM settings_guild where guild_id=?', (guild.id,))
         record = cur.fetchone()
         
@@ -87,7 +87,7 @@ async def get_prefix(bot, ctx, guild_join=False):
 async def get_user_number(ctx):
     
     try:
-        cur=erg_db.cursor()
+        cur=archmage_db.cursor()
         cur.execute('SELECT COUNT(*) FROM settings_user')
         record = cur.fetchone()
         
@@ -104,7 +104,7 @@ async def get_user_number(ctx):
 async def get_settings(ctx):
     
     try:
-        cur=erg_db.cursor()
+        cur=archmage_db.cursor()
         cur.execute('SELECT target_enchant FROM settings_user where user_id=?', (ctx.author.id,))
         record = cur.fetchone()
         
@@ -126,7 +126,7 @@ async def get_settings(ctx):
 async def set_prefix(bot, ctx, new_prefix):
 
     try:
-        cur=erg_db.cursor()
+        cur=archmage_db.cursor()
         cur.execute('SELECT * FROM settings_guild where guild_id=?', (ctx.guild.id,))
         record = cur.fetchone()
         
@@ -141,7 +141,7 @@ async def set_prefix(bot, ctx, new_prefix):
 async def set_enchant(ctx, enchant):
     
     try:
-        cur=erg_db.cursor()
+        cur=archmage_db.cursor()
         cur.execute('SELECT * FROM settings_user where user_id=?', (ctx.author.id,))
         record = cur.fetchone()
         
@@ -167,13 +167,13 @@ async def log_error(ctx, error, guild_join=False):
                 settings = f'Enchant {user_settings[0]}'
             except:
                 settings = 'N/A'
-            cur=erg_db.cursor()
+            cur=archmage_db.cursor()
             cur.execute('INSERT INTO errors VALUES (?, ?, ?, ?)', (ctx.message.created_at, ctx.message.content, str(error), settings))
         except sqlite3.Error as db_error:
             print(print(f'Error inserting error (ha) into database.\n{db_error}'))
     else:
         try:
-            cur=erg_db.cursor()
+            cur=archmage_db.cursor()
             cur.execute('INSERT INTO errors VALUES (?, ?, ?, ?)', (datetime.now(), 'Error when joining a new guild', str(error), 'N/A'))
         except sqlite3.Error as db_error:
             print(print(f'Error inserting error (ha) into database.\n{db_error}'))
