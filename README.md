@@ -1,4 +1,4 @@
-# archmage
+# Archmage
 
 Simple enchant mute for EPIC RPG.
 
