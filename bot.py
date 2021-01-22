@@ -1,4 +1,5 @@
 # bot.py
+
 import os
 import discord
 import sqlite3
