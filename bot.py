@@ -425,7 +425,6 @@ async def enchant(ctx, *args):
                 current_enchant = enchants.index(current_enchant_name.lower())
                 
                 if current_enchant >= target_enchant:
-                    guild = ctx.guild
                     user = ctx.author
                     channel = ctx.channel
                     
