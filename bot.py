@@ -8,14 +8,11 @@ import global_data
 import emojis
 import logging
 import logging.handlers
-from emoji import demojize
-from emoji import emojize
 
 from dotenv import load_dotenv
 from discord.ext import commands, tasks
 from datetime import datetime
 from discord.ext.commands import CommandNotFound
-from math import ceil
 
 # Check if log file exists, if not, create empty one
 logfile = global_data.logfile
