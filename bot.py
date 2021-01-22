@@ -32,7 +32,6 @@ logger.addHandler(handler)
 # Read the bot token from the .env file
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-DBL_TOKEN = os.getenv('DBL_TOKEN')
 
 # Set name of database files
 dbfile = global_data.dbfile
@@ -122,6 +121,7 @@ async def get_settings(ctx):
     return current_settings
 
 
+
 # --- Database: Write Data ---
 
 # Set new prefix
@@ -155,6 +155,7 @@ async def set_enchant(ctx, enchant):
         await log_error(ctx, error)
 
 
+
 # --- Error Logging ---
 
 # Error logging
@@ -180,6 +181,7 @@ async def log_error(ctx, error, guild_join=False):
             print(print(f'Error inserting error (ha) into database.\n{db_error}'))
 
 
+
 # --- First Time User ---
 
 # Welcome message to inform the user of his/her initial settings
@@ -199,6 +201,7 @@ async def first_time_user(bot, ctx):
         raise FirstTimeUser("First time user, pls ignore")
 
 
+
 # --- Command Initialization ---
 
 bot = commands.Bot(command_prefix=get_prefix_all, help_command=None, case_insensitive=True)
@@ -207,6 +210,8 @@ bot = commands.Bot(command_prefix=get_prefix_all, help_command=None, case_insens
 class FirstTimeUser(commands.CommandError):
         def __init__(self, argument):
             self.argument = argument
+
+
 
 # --- Ready & Join Events ---
 
@@ -267,7 +272,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, FirstTimeUser):
         return
     else:
-        await log_error(ctx, error) # To the database you go
+        await log_error(ctx, error)
+
 
 
 # --- Server Settings ---
@@ -297,6 +303,7 @@ async def prefix(ctx):
     if not ctx.prefix == 'rpg ':
         current_prefix = await get_prefix(bot, ctx)
         await ctx.send(f'The prefix for this server is `{current_prefix}`\nTo change the prefix use `{current_prefix}setprefix [prefix]`.')
+
 
 
 # --- User Settings ---
@@ -418,8 +425,6 @@ async def enchant(ctx, *args):
                 current_enchant_name = answer[current_enchant_start:current_enchant_end]
                 
                 current_enchant = enchants.index(current_enchant_name.lower())
-                
-                #await ctx.send(f'You enchanted **{current_enchant_name}**({current_enchant}). You want to have **{target_enchant_name}**({target_enchant}).')
                 
                 if current_enchant >= target_enchant:
                     guild = ctx.guild
