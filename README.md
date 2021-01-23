@@ -1,6 +1,7 @@
 # Archmage
 
-Simple enchant mute for EPIC RPG.
+Simple enchant mute for EPIC RPG.  
+Goes without saying but nontheless: Please note that you can not mute yourself in a server that you are admin in.  
 
 **Setup**  
 To set up the bot, simply do the following:  
