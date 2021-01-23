@@ -10,3 +10,9 @@ To set up the bot, simply do the following:
 **Usage**  
 The default prefix is `-`. Use `-help` to see all commands.  
 You can also ping the bot (and change the prefix).  
+
+**Permissions**  
+The bot needs the following permissions to run properly:  
+• Manage Roles (for the mute)  
+• Send Messages  
+• Embed Links  
