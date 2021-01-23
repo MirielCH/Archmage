@@ -16,7 +16,11 @@ from datetime import datetime
 from discord.ext.commands import CommandNotFound
 
 # Check if log file exists, if not, create empty one
+log_dir = global_data.log_dir
 logfile = global_data.logfile
+
+if not os.path.exists(log_dir):
+    os.mkdir(log_dir)
 if not os.path.isfile(logfile):
     open(logfile, 'a').close()
 

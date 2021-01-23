@@ -31,4 +31,5 @@ async def default_footer(prefix):
     return footer
 
 # Error log file
-logfile = os.path.join(bot_dir, 'logs/discord.log')
+log_dir = os.path.join(bot_dir, 'logs/')
+logfile = os.path.join(log_dir, 'discord.log')
