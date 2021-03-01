@@ -399,6 +399,8 @@ async def enchant(ctx, *args):
         
         return m.author.id == 555955826880413696 and m.channel == ctx.channel and correct_embed
 
+    invoked = ctx.invoked_with
+
     prefix = ctx.prefix
     if prefix.lower() == 'rpg 'and len(args) == 1:
         arg = args[0]
@@ -443,6 +445,16 @@ async def enchant(ctx, *args):
             except asyncio.TimeoutError as error:
                 return
         
+
+# --- Ascended commmands ---
+@bot.command()
+@commands.bot_has_permissions(send_messages=True, manage_roles=True)
+async def ascended(ctx, *args):
+
+    prefix = ctx.prefix
+    if prefix.lower() == 'rpg 'and len(args)>=2:
+        if args[0] in ('enchant','refine','transmute','transcend',):
+            x = await enchant(ctx,args[1],)
 
 
 # --- Main menus ---
