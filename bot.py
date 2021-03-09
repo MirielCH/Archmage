@@ -115,6 +115,7 @@ async def get_settings(ctx):
         if record:
             current_settings = record
         else:
+            await set_enchant(ctx, 13) # Set enchant to "None", so this message doesn't trigger multiple times
             await first_time_user(bot, ctx)
             
     except sqlite3.Error as error:
@@ -191,11 +192,11 @@ async def first_time_user(bot, ctx):
     
     try:
         
-        prefix = ctx.prefix
+        prefix = await get_prefix(bot, ctx)
         
         await ctx.send(
-            f'Hey, **{ctx.author.name}**, you haven\'t set an enchant yet.\n'
-            f'Use `{ctx.prefix}set [enchant]` to set the enchant you\'re going for and I will mute you once you reach the set enchant (or a higher one, of course).'
+            f'Hey, **{ctx.author.name}**, I can help you with your enchanting if you like!\n'
+            f'Use `{prefix}set [enchant]` to set the enchant you are going for and I will mute you once you reach the set enchant (or a higher one, of course).'
         )
     except:
         raise
@@ -324,15 +325,22 @@ async def settings(ctx):
             enchant_setting = current_settings[0]
             enchant_setting = int(enchant_setting)
             enchant_name = enchants[enchant_setting]
-            if enchant_setting > 7:
-                enchant_name = enchant_name.upper()
-            else:
-                enchant_name = enchant_name.title()
             
-            await ctx.send(
-                f'**{ctx.author.name}**, your target enchant is set to **{enchant_name}**.\n'
-                f'Use `{ctx.prefix}set [enchant]` to change it.'
-            )
+            if not enchant_name == 'none':
+                if enchant_setting > 7:
+                    enchant_name = enchant_name.upper()
+                else:
+                    enchant_name = enchant_name.title()
+                await ctx.send(
+                    f'**{ctx.author.name}**, your target enchant is set to **{enchant_name}**.\n'
+                    f'Use `{ctx.prefix}set [enchant]` to change it.'
+                )
+            else:
+                await ctx.send(
+                    f'**{ctx.author.name}**, you don\'t have an enchant set.\n'
+                    f'Use `{ctx.prefix}set [enchant]` to change it.'
+                )
+            
     
 # Command "setenchant" - Sets your target enchant
 @bot.command(aliases=('se','set',))
@@ -364,13 +372,18 @@ async def setenchant(ctx, *args):
             
             if target_enchant in enchants:
                 enchant_index = enchants.index(target_enchant)
-                if enchant_index > 7:
-                    target_enchant = target_enchant.upper()
-                else:
-                    target_enchant = target_enchant.title()
+                if not target_enchant == 'none':
+                    if enchant_index > 7:
+                        target_enchant = target_enchant.upper()
+                    else:
+                        target_enchant = target_enchant.title()
 
-                await set_enchant(ctx, enchant_index)
-                await ctx.send(f'Alright **{ctx.author.name}**, I\'ll mute you when you enchant your gear to **{target_enchant}** or higher.')
+                    await set_enchant(ctx, enchant_index)
+                    await ctx.send(f'Alright **{ctx.author.name}**, I\'ll mute you when you enchant your gear to **{target_enchant}** or higher.')
+                else:
+                    await set_enchant(ctx, 13)
+                    await ctx.send(f'Alright **{ctx.author.name}**, you don\'t have a target enchant anymore.')
+                    return
                 
             else:
                 await ctx.send(f'I don\'t know any enchant called `{original_args}`.')
@@ -413,35 +426,36 @@ async def enchant(ctx, *args):
                 except:
                     return
               
-                settings = await get_settings(ctx)   
+                settings = await get_settings(ctx)
                 target_enchant = settings[0]
                 target_enchant = int(target_enchant)
                 enchants = global_data.enchants_list
                 enchant_name = enchants[target_enchant]
                 
-                if target_enchant > 7:
-                    target_enchant_name = enchant_name.upper()
-                else:
-                    target_enchant_name = enchant_name.title()
-                
-                current_enchant_start = answer.find('~-~>') + 7
-                current_enchant_end = answer.find('<~-~', current_enchant_start) - 3
-                current_enchant_name = answer[current_enchant_start:current_enchant_end]
-                
-                current_enchant = enchants.index(current_enchant_name.lower())
-                
-                if current_enchant >= target_enchant:
-                    user = ctx.author
-                    channel = ctx.channel
+                if not enchant_name == 'none':
+                    if target_enchant > 7:
+                        target_enchant_name = enchant_name.upper()
+                    else:
+                        target_enchant_name = enchant_name.title()
                     
-                    overwrite = discord.PermissionOverwrite()
-                    overwrite.send_messages = False
+                    current_enchant_start = answer.find('~-~>') + 7
+                    current_enchant_end = answer.find('<~-~', current_enchant_start) - 3
+                    current_enchant_name = answer[current_enchant_start:current_enchant_end]
                     
-                    await channel.set_permissions(user, overwrite=overwrite)
-                    await ctx.send(f"{user.mention} Nice! Looks like you enchanted **{current_enchant_name}**. Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.")
-                    await asyncio.sleep(5)
-                    await channel.set_permissions(user, overwrite=None)
-                    await ctx.send(f"Carry on.")
+                    current_enchant = enchants.index(current_enchant_name.lower())
+                    
+                    if current_enchant >= target_enchant:
+                        user = ctx.author
+                        channel = ctx.channel
+                        
+                        overwrite = discord.PermissionOverwrite()
+                        overwrite.send_messages = False
+                        
+                        await channel.set_permissions(user, overwrite=overwrite)
+                        await ctx.send(f"{user.mention} Nice! Looks like you enchanted **{current_enchant_name}**. Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.")
+                        await asyncio.sleep(5)
+                        await channel.set_permissions(user, overwrite=None)
+                        await ctx.send(f"Carry on.")
             except asyncio.TimeoutError as error:
                 return
         

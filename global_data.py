@@ -12,13 +12,16 @@ dbfile = os.path.join(bot_dir, 'database/archmage_db.db')
 default_prefix = '-'
 
 # All enchants
-enchants_list = ('normie','good','great','mega','epic','hyper','ultimate','perfect','edgy','ultra-edgy','omega','ultra-omega','godly',)
+enchants_list = ('normie','good','great','mega','epic','hyper','ultimate','perfect','edgy','ultra-edgy','omega','ultra-omega','godly','none',)
 enchants_aliases = {
     'ed': 'edgy',
     'ultraedgy': 'ultra-edgy',
     'ue': 'ultra-edgy',
     'ultraomega': 'ultra-omega',
-    'uo': 'ultra-omega'
+    'uo': 'ultra-omega',
+    'off': 'none',
+    'disable': 'none',
+    'disabled': 'none'
 }
 
 # Embed color
