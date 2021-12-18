@@ -37,7 +37,7 @@ class EnchantMuteCog(commands.Cog):
                 and
                 any(enchant in message_field.lower() for enchant in enchants_lower)
             ):
-                user_id = user_name = None
+                user_id = user_name = user = None
                 try:
                     user_id = int(re.search("avatars\/(.+?)\/", icon_url).group(1))
                 except:
@@ -53,7 +53,6 @@ class EnchantMuteCog(commands.Cog):
                     await message.add_reaction(emojis.WARNING)
                     await database.log_error(error)
                     return
-                user = None
                 if user_id is not None:
                     user = await message.guild.fetch_member(user_id)
                 else:
@@ -64,6 +63,7 @@ class EnchantMuteCog(commands.Cog):
                             break
                 if user is None:
                     await message.add_reaction(emojis.WARNING)
+                    await database.log_error(f'User not determinable in enchant message: {message}')
                     return
                 try:
                     user_settings: database.User = await database.get_user(user.id)
@@ -97,7 +97,7 @@ class EnchantMuteCog(commands.Cog):
                         await channel.send("Carry on.")
                     except:
                         await channel.send(
-                            f'Whoops, looks like I\'m lacking the permission to change channel permissions.\n'
+                            f'{emojis.WARNING} Whoops, looks like I\'m lacking the permission to change channel permissions.\n'
                             f'Please check my permissions in this channel.'
                         )
 

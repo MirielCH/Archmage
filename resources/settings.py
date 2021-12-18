@@ -33,7 +33,7 @@ ENCHANTS = (
     'Ultimate',
     'Perfect',
     'EDGY',
-    'ULTRY-EDGY',
+    'ULTRA-EDGY',
     'OMEGA',
     'ULTRA-OMEGA',
     'GODLY',
