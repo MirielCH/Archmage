@@ -36,7 +36,7 @@ class MainCog(commands.Cog):
      # Events
     @commands.Cog.listener()
     async def on_application_command_error(self, ctx: discord.ApplicationContext, error: Exception) -> None:
-        """Runs when an error occurs and handles them accordingly.
+        """Runs when an application command error occurs and handles them accordingly.
         Interesting errors get written to the database for further review.
         """
         async def send_error() -> None:

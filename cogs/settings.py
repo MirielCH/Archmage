@@ -6,7 +6,7 @@ from discord.commands import slash_command, Option, SlashCommandGroup
 from discord.ext import commands
 
 import database
-from resources import settings
+from resources import emojis, settings
 
 
 class SettingsCog(commands.Cog):
@@ -18,6 +18,24 @@ class SettingsCog(commands.Cog):
         "set",
         "Various settings",
     )
+
+    async def check_channel_permissions(self, ctx: discord.ApplicationContext) -> str:
+        """Checks if Archmage has the proper permissions to do the enchant mute in this channel
+
+        Returns
+        -------
+        List with all missing permissions
+        """
+        channel_permissions = ctx.channel.permissions_for(ctx.guild.me)
+        missing_perms = []
+        if not channel_permissions.view_channel:
+            missing_perms.append('View Channel')
+        else:
+            if not channel_permissions.send_messages:
+                missing_perms.append('Send Messages')
+            if not channel_permissions.manage_permissions:
+                missing_perms.append('Manage Permissions')
+        return missing_perms
 
     @slash_command(name='settings')
     async def settings_command(self, ctx: discord.ApplicationContext) -> None:
@@ -41,6 +59,14 @@ class SettingsCog(commands.Cog):
                 f'**{ctx.author.name}**, your target enchant is set to **{target_enchant}**.\n'
                 f'Use `/set enchant` to change it.'
             )
+        missing_perms = await self.check_channel_permissions(ctx)
+        if missing_perms:
+            answer = (
+                f'{answer}\n\n'
+                f'{emojis.WARNING} **Important**: I am not able to mute you in this channel because I lack the following permissions:'
+            )
+            for missing_perm in missing_perms:
+                answer = f'{answer}\n{emojis.BP} {missing_perm}'
         await ctx.respond(answer)
 
     @setting.command(name='enchant')
@@ -59,6 +85,14 @@ class SettingsCog(commands.Cog):
             )
         else:
             answer = f'Alright **{ctx.author.name}**, you don\'t have an enchant set anymore.'
+        missing_perms = await self.check_channel_permissions(ctx)
+        if missing_perms:
+            answer = (
+                f'{answer}\n\n'
+                f'{emojis.WARNING} **Important**: I am not able to mute you in this channel because I lack the following permissions:'
+            )
+            for missing_perm in missing_perms:
+                answer = f'{answer}\n{emojis.BP} {missing_perm}'
         await ctx.respond(answer)
 
 

@@ -27,6 +27,7 @@ class EnchantMuteCog(commands.Cog):
                     .decode('ASCII').replace('\\','')
                 )
                 message_field = str(message.embeds[0].fields[0].name)
+                icon_url = message.embeds[0].author.icon_url
             except:
                 return
             enchant_actions = ['enchant', 'refine', 'transmute', 'transcend']
@@ -36,19 +37,31 @@ class EnchantMuteCog(commands.Cog):
                 and
                 any(enchant in message_field.lower() for enchant in enchants_lower)
             ):
+                user_id = user_name = None
                 try:
-                    user_name = re.search("^(.+?)'s", message_author).group(1)
+                    user_id = int(re.search("avatars\/(.+?)\/", icon_url).group(1))
+                except:
+                    try:
+                        user_name = re.search("^(.+?)'s", message_author).group(1)
+                    except Exception as error:
+                        await message.add_reaction(emojis.WARNING)
+                        await database.log_error(error)
+                        return
+                try:
                     enchant = re.search('~-~> \*\*(.+?)\*\* <~-~', message_field).group(1)
                 except Exception as error:
                     await message.add_reaction(emojis.WARNING)
                     await database.log_error(error)
                     return
                 user = None
-                for member in message.guild.members:
-                    member_name = member.name.encode('unicode-escape',errors='ignore').decode('ASCII').replace('\\','')
-                    if member_name == user_name:
-                        user = member
-                        break
+                if user_id is not None:
+                    user = await message.guild.fetch_member(user_id)
+                else:
+                    for member in message.guild.members:
+                        member_name = member.name.encode('unicode-escape',errors='ignore').decode('ASCII').replace('\\','')
+                        if member_name == user_name:
+                            user = member
+                            break
                 if user is None:
                     await message.add_reaction(emojis.WARNING)
                     return
@@ -70,17 +83,23 @@ class EnchantMuteCog(commands.Cog):
                     original_permissions = channel.overwrites_for(user)
                     if original_permissions.is_empty(): original_permissions = None
                     overwrite = discord.PermissionOverwrite(send_messages=False)
-                    await channel.set_permissions(user, overwrite=overwrite)
-                    await channel.send(
-                        f'{user.mention} Nice! Looks like you enchanted **{enchant}**.\n'
-                        f'Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.'
-                    )
-                    await asyncio.sleep(5)
-                    if channel_was_synced:
-                        await channel.edit(sync_permissions=True)
-                    else:
-                        await channel.set_permissions(user, overwrite=original_permissions)
-                    await channel.send("Carry on.")
+                    try:
+                        await channel.set_permissions(user, overwrite=overwrite)
+                        await channel.send(
+                            f'{user.mention} Nice! Looks like you enchanted **{enchant}**.\n'
+                            f'Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.'
+                        )
+                        await asyncio.sleep(5)
+                        if channel_was_synced:
+                            await channel.edit(sync_permissions=True)
+                        else:
+                            await channel.set_permissions(user, overwrite=original_permissions)
+                        await channel.send("Carry on.")
+                    except:
+                        await channel.send(
+                            f'Whoops, looks like I\'m lacking the permission to change channel permissions.\n'
+                            f'Please check my permissions in this channel.'
+                        )
 
 
 # Initialization
