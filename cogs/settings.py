@@ -24,7 +24,7 @@ class SettingsCog(commands.Cog):
 
         Returns
         -------
-        List with all missing permissions
+        List with all missing permissions: list(str)
         """
         channel_permissions = ctx.channel.permissions_for(ctx.guild.me)
         missing_perms = []
@@ -35,6 +35,8 @@ class SettingsCog(commands.Cog):
                 missing_perms.append('Send Messages')
             if not channel_permissions.manage_permissions:
                 missing_perms.append('Manage Permissions')
+            if not channel_permissions.add_reactions:
+                missing_perms.append('Add Reactions')
         return missing_perms
 
     @slash_command(name='settings')
