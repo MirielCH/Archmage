@@ -1,6 +1,7 @@
 # settings.py
 """Contains setting commands"""
 
+import asyncio
 import discord
 from discord.commands import slash_command, Option, SlashCommandGroup
 from discord.ext import commands
