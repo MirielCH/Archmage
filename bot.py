@@ -20,13 +20,13 @@ else:
     bot = commands.Bot(help_command=None, case_insensitive=True, intents=intents,
                        owner_id=settings.OWNER_ID)
 
-
 EXTENSIONS = [
     'cogs.main',
     'cogs.dev',
     'cogs.enchant_mute',
     'cogs.settings',
 ]
+
 if __name__ == '__main__':
     for extension in EXTENSIONS:
         bot.load_extension(extension)
