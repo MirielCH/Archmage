@@ -89,7 +89,10 @@ class EnchantMuteCog(commands.Cog):
                     except:
                         mute_message = (
                             f'{mute_message}\n'
-                            f'Sadly I was unable to mute you. I either lack the proper permissions or you are an admin.'
+                            f'Sadly I was unable to mute you. This is probably due to one of the following reasons:\n'
+                            f'{emojis.BP} I lack the permission `Timeout Members`\n'
+                            f'{emojis.BP} My role is below your highest role\n'
+                            f'{emojis.BP} You are an administrator\n'
                         )
 
                     await channel.send(mute_message)

@@ -21,6 +21,8 @@ The two dev commands are never registered globally, no matter the `DEBUG_MODE` s
 The bot needs the following permissions to run properly:  
 • The scope `application.commands` in the guild for the slash commands.  
 • Permissions `Send Messages`, `Timeout Members`, `Add Reactions` and `View Channel` in the channel you want use the bot in.  
+• The bot role needs to be above the people it is supposed to mute.  
+
 Note that due to the fact that slash commands work outside of the channel permissions currently, you can set an enchant in channels where the bot won't mute. The bot checks for these permissions when setting an enchant and lets you know when it won't work.  
 
 **Warning Emojis**  
