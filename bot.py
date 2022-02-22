@@ -9,8 +9,9 @@ from resources import settings
 
 intents = discord.Intents.none()
 intents.guilds = True       # For on_guild_join() and all guild objects
-intents.messages = True     # For detecting enchants
+intents.messages = True
 intents.members = True      # To get the user object from the user name
+intents.message_content = True # For detecting enchants
 
 
 if settings.DEBUG_MODE == 'ON': # Make sure you have debug mode set to ON when debugging

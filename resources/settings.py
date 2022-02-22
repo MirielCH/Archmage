@@ -37,5 +37,6 @@ ENCHANTS = (
     'OMEGA',
     'ULTRA-OMEGA',
     'GODLY',
+    'VOID',
     'None',
 )

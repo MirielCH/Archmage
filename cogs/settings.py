@@ -34,10 +34,10 @@ class SettingsCog(commands.Cog):
         else:
             if not channel_permissions.send_messages:
                 missing_perms.append('Send Messages')
-            if not channel_permissions.manage_permissions:
-                missing_perms.append('Manage Permissions')
             if not channel_permissions.add_reactions:
                 missing_perms.append('Add Reactions')
+            if not channel_permissions.moderate_members:
+                missing_perms.append('Timeout Members')
         return missing_perms
 
     @slash_command(name='settings')
@@ -52,7 +52,7 @@ class SettingsCog(commands.Cog):
             )
             return
         target_enchant = settings.ENCHANTS[user_settings.target_enchant]
-        if user_settings.target_enchant == 13:
+        if user_settings.target_enchant == settings.ENCHANTS.index('None'):
             answer = (
                 f'**{ctx.author.name}**, you don\'t have a target enchant set.\n'
                 f'Use `/set enchant` to set one.'
@@ -81,7 +81,7 @@ class SettingsCog(commands.Cog):
         """Sets the enchant you are going for. You will be muted if you get the selected or a higher enchant."""
         enchant_index = settings.ENCHANTS.index(enchant)
         await database.update_user(ctx.author.id, target_enchant=enchant_index)
-        if enchant_index < 13:
+        if enchant_index < len(settings.ENCHANTS) - 1:
             answer = (
                 f'Alright **{ctx.author.name}**, '
                 f'I\'ll mute you when you enchant your gear to **{enchant}** or higher.'

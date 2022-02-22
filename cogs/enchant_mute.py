@@ -1,7 +1,7 @@
 # main.py
 """Contains the enchant mute event"""
 
-import asyncio
+from datetime import timedelta
 import re
 
 import discord
@@ -79,27 +79,20 @@ class EnchantMuteCog(commands.Cog):
                 if enchant_index >= user_settings.target_enchant:
                     target_enchant_name = settings.ENCHANTS[user_settings.target_enchant]
                     channel = message.channel
-                    channel_was_synced = channel.permissions_synced
-                    original_permissions = channel.overwrites_for(user)
-                    if original_permissions.is_empty(): original_permissions = None
-                    overwrite = discord.PermissionOverwrite(send_messages=False)
+                    mute_message = f'{user.mention} Nice! Looks like you enchanted **{enchant}**.'
                     try:
-                        await channel.set_permissions(user, overwrite=overwrite)
-                        await channel.send(
-                            f'{user.mention} Nice! Looks like you enchanted **{enchant}**.\n'
+                        await user.timeout_for(timedelta(seconds=5), reason='Enchant mute')
+                        mute_message = (
+                            f'{mute_message}\n'
                             f'Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.'
                         )
-                        await asyncio.sleep(5)
-                        if channel_was_synced:
-                            await channel.edit(sync_permissions=True)
-                        else:
-                            await channel.set_permissions(user, overwrite=original_permissions)
-                        await channel.send("Carry on.")
                     except:
-                        await channel.send(
-                            f'{emojis.WARNING} Whoops, looks like I\'m lacking the permission to change channel permissions.\n'
-                            f'Please check my permissions in this channel.'
+                        mute_message = (
+                            f'{mute_message}\n'
+                            f'Sadly I was unable to mute you. I either lack the proper permissions or you are an admin.'
                         )
+
+                    await channel.send(mute_message)
 
 
 # Initialization
