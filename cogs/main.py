@@ -25,7 +25,7 @@ class MainCog(commands.Cog):
 
     @slash_command()
     async def about(self, ctx: discord.ApplicationContext):
-        """Shows some info about Room Wizard"""
+        """Shows some info about Archmage"""
         start_time = datetime.utcnow()
         await ctx.respond('Testing API latency...')
         end_time = datetime.utcnow()
