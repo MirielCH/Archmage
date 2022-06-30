@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 
 import database
-from resources import emojis, exceptions, settings
+from resources import emojis, exceptions, functions, settings
 
 
 class EnchantMuteCog(commands.Cog):
@@ -38,32 +38,40 @@ class EnchantMuteCog(commands.Cog):
                 any(enchant in message_field.lower() for enchant in enchants_lower)
             ):
                 user_id = user_name = user = None
-                try:
-                    user_id = int(re.search("avatars\/(.+?)\/", icon_url).group(1))
-                except:
+                user = await functions.get_interaction_user(message)
+                if user is not None: user = await message.guild.fetch_member(user.id)
+                if user is None:
                     try:
-                        user_name = re.search("^(.+?)'s", message_author).group(1)
-                    except Exception as error:
+                        user_id = int(re.search("avatars\/(.+?)\/", icon_url).group(1))
+                    except:
+                        try:
+                            search_patterns = [
+                                "^(.+?)'s", #English
+                                "^(.+?) —", #Spanish, Portuguese
+                            ]
+                            user_name_match = await functions.get_match_from_patterns(search_patterns, message_author)
+                            user_name = user_name_match.group(1)
+                        except Exception as error:
+                            await message.add_reaction(emojis.WARNING)
+                            await database.log_error(error)
+                            return
+                    if user_id is not None:
+                        user = await message.guild.fetch_member(user_id)
+                    else:
+                        for member in message.guild.members:
+                            member_name = member.name.encode('unicode-escape',errors='ignore').decode('ASCII').replace('\\','')
+                            if member_name == user_name:
+                                user = member
+                                break
+                    if user is None:
                         await message.add_reaction(emojis.WARNING)
-                        await database.log_error(error)
+                        await database.log_error(f'User not determinable in enchant message: {message}')
                         return
                 try:
                     enchant = re.search('~-~> \*\*(.+?)\*\* <~-~', message_field).group(1)
                 except Exception as error:
                     await message.add_reaction(emojis.WARNING)
                     await database.log_error(error)
-                    return
-                if user_id is not None:
-                    user = await message.guild.fetch_member(user_id)
-                else:
-                    for member in message.guild.members:
-                        member_name = member.name.encode('unicode-escape',errors='ignore').decode('ASCII').replace('\\','')
-                        if member_name == user_name:
-                            user = member
-                            break
-                if user is None:
-                    await message.add_reaction(emojis.WARNING)
-                    await database.log_error(f'User not determinable in enchant message: {message}')
                     return
                 try:
                     user_settings: database.User = await database.get_user(user.id)
@@ -86,7 +94,7 @@ class EnchantMuteCog(commands.Cog):
                             f'{mute_message}\n'
                             f'Because you set **{target_enchant_name}** as your target, you are now muted for 5 seconds.'
                         )
-                    except:
+                    except Exception as error:
                         mute_message = (
                             f'{mute_message}\n'
                             f'Sadly I was unable to mute you. This is probably due to one of the following reasons:\n'
