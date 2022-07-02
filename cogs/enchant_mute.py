@@ -46,8 +46,7 @@ class EnchantMuteCog(commands.Cog):
                     except:
                         try:
                             search_patterns = [
-                                "^(.+?)'s", #English
-                                "^(.+?) —", #Spanish, Portuguese
+                                "^(.+?) u2014", #All languages
                             ]
                             user_name_match = await functions.get_match_from_patterns(search_patterns, message_author)
                             user_name = user_name_match.group(1)
