@@ -5,7 +5,7 @@ import importlib
 import sys
 
 import discord
-from discord.commands import SlashCommandGroup, CommandPermission, Option
+from discord.commands import SlashCommandGroup, Option
 from discord.ext import commands
 
 from resources import settings, views
@@ -20,21 +20,20 @@ class DevCog(commands.Cog):
         "dev",
         "Development commands",
         guild_ids=settings.DEV_GUILDS,
-        permissions=[
-            CommandPermission(
-                "owner", 2, True
-            ),
-        ],
     )
 
     # Commands
     @dev.command()
+    @discord.default_permissions(administrator=True)
     async def reload(
         self,
         ctx: discord.ApplicationContext,
         modules: Option(str, 'Cogs or modules to reload'),
     ) -> None:
         """Reloads cogs or modules, does not work properly with current Pycord version!"""
+        if ctx.author.id != settings.OWNER_ID:
+            await ctx.respond('As you might have guessed, you are not allowed to use this command.', ephemeral=True)
+            return
         modules = modules.split(' ')
         actions = []
         for module in modules:
@@ -64,8 +63,12 @@ class DevCog(commands.Cog):
         await ctx.respond(f'```diff\n{message}\n```')
 
     @dev.command()
+    @discord.default_permissions(administrator=True)
     async def shutdown(self, ctx: discord.ApplicationContext):
         """Shuts down the bot"""
+        if ctx.author.id != settings.OWNER_ID:
+            await ctx.respond('As you might have guessed, you are not allowed to use this command.', ephemeral=True)
+            return
         view = views.ConfirmCancelView(ctx)
         await ctx.respond(f'**{ctx.author.name}**, are you **SURE**?', view=view)
         view.message = message = await ctx.interaction.original_message()
