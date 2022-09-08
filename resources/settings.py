@@ -24,7 +24,6 @@ EMBED_COLOR = 0xDD9624
 DEFAULT_FOOTER = 'You look simply enchanting today.'
 
 ENCHANTS = (
-    'Normie',
     'Good',
     'Great',
     'Mega',
